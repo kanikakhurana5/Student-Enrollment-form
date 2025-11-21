@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Record Management</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 20px;
+        }
+        
+        .status-message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        input:disabled, select:disabled {
+            background-color: #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-save {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-save:hover:not(:disabled) {
+            background-color: #27ae60;
+        }
+        
+        .btn-update {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-update:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        
+        .btn-reset {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-reset:hover:not(:disabled) {
+            background-color: #e67e22;
+        }
+        
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Student Record Management</h1>
+            <p class="subtitle">Enter student ID to begin</p>
+        </header>
+        
+        <div class="form-container">
+            <div id="statusMessage" class="status-message"></div>
+            
+            <form id="studentForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="studentId">Student ID *</label>
+                        <input type="text" id="studentId" name="studentId" required>
+                        <div class="error-message" id="studentIdError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="firstName">First Name *</label>
+                        <input type="text" id="firstName" name="firstName" required disabled>
+                        <div class="error-message" id="firstNameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName">Last Name *</label>
+                        <input type="text" id="lastName" name="lastName" required disabled>
+                        <div class="error-message" id="lastNameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required disabled>
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="birthDate">Birth Date *</label>
+                        <input type="date" id="birthDate" name="birthDate" required disabled>
+                        <div class="error-message" id="birthDateError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="enrollmentDate">Enrollment Date *</label>
+                        <input type="date" id="enrollmentDate" name="enrollmentDate" required disabled>
+                        <div class="error-message" id="enrollmentDateError"></div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label for="program">Program *</label>
+                        <select id="program" name="program" required disabled>
+                            <option value="">Select a program</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Business Administration">Business Administration</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Psychology">Psychology</option>
+                            <option value="Biology">Biology</option>
+                        </select>
+                        <div class="error-message" id="programError"></div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" id="saveBtn" class="btn-save" disabled>Save</button>
+                    <button type="button" id="updateBtn" class="btn-update" disabled>Update</button>
+                    <button type="button" id="resetBtn" class="btn-reset">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const studentForm = document.getElementById('studentForm');
+        const studentIdInput = document.getElementById('studentId');
+        const firstNameInput = document.getElementById('firstName');
+        const lastNameInput = document.getElementById('lastName');
+        const emailInput = document.getElementById('email');
+        const birthDateInput = document.getElementById('birthDate');
+        const enrollmentDateInput = document.getElementById('enrollmentDate');
+        const programSelect = document.getElementById('program');
+        
+        const saveBtn = document.getElementById('saveBtn');
+        const updateBtn = document.getElementById('updateBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        const statusMessage = document.getElementById('statusMessage');
+        
+        // Error message elements
+        const studentIdError = document.getElementById('studentIdError');
+        const firstNameError = document.getElementById('firstNameError');
+        const lastNameError = document.getElementById('lastNameError');
+        const emailError = document.getElementById('emailError');
+        const birthDateError = document.getElementById('birthDateError');
+        const enrollmentDateError = document.getElementById('enrollmentDateError');
+        const programError = document.getElementById('programError');
+        
+        // Initial state setup
+        function initializeForm() {
+            // Clear all inputs
+            studentForm.reset();
+            
+            // Disable all inputs except studentId
+            firstNameInput.disabled = true;
+            lastNameInput.disabled = true;
+            emailInput.disabled = true;
+            birthDateInput.disabled = true;
+            enrollmentDateInput.disabled = true;
+            programSelect.disabled = true;
+            
+            // Disable Save and Update buttons
+            saveBtn.disabled = true;
+            updateBtn.disabled = true;
+            
+            // Enable Reset button
+            resetBtn.disabled = false;
+            
+            // Clear error messages
+            clearErrorMessages();
+            
+            // Clear status message
+            hideStatusMessage();
+            
+            // Focus on student ID
+            studentIdInput.focus();
+        }
+        
+        // Clear all error messages
+        function clearErrorMessages() {
+            studentIdError.style.display = 'none';
+            firstNameError.style.display = 'none';
+            lastNameError.style.display = 'none';
+            emailError.style.display = 'none';
+            birthDateError.style.display = 'none';
+            enrollmentDateError.style.display = 'none';
+            programError.style.display = 'none';
+        }
+        
+        // Show status message
+        function showStatusMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message';
+            
+            switch(type) {
+                case 'info':
+                    statusMessage.classList.add('status-info');
+                    break;
+                case 'success':
+                    statusMessage.classList.add('status-success');
+                    break;
+                case 'error':
+                    statusMessage.classList.add('status-error');
+                    break;
+            }
+            
+            statusMessage.style.display = 'block';
+        }
+        
+        // Hide status message
+        function hideStatusMessage() {
+            statusMessage.style.display = 'none';
+        }
+        
+        // Validate form
+        function validateForm() {
+            let isValid = true;
+            clearErrorMessages();
+            
+            // Validate student ID
+            if (!studentIdInput.value.trim()) {
+                studentIdError.textContent = 'Student ID is required';
+                studentIdError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate first name
+            if (!firstNameInput.value.trim()) {
+                firstNameError.textContent = 'First name is required';
+                firstNameError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate last name
+            if (!lastNameInput.value.trim()) {
+                lastNameError.textContent = 'Last name is required';
+                lastNameError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate email
+            if (!emailInput.value.trim()) {
+                emailError.textContent = 'Email is required';
+                emailError.style.display = 'block';
+                isValid = false;
+            } else if (!isValidEmail(emailInput.value)) {
+                emailError.textContent = 'Please enter a valid email address';
+                emailError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate birth date
+            if (!birthDateInput.value) {
+                birthDateError.textContent = 'Birth date is required';
+                birthDateError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate enrollment date
+            if (!enrollmentDateInput.value) {
+                enrollmentDateError.textContent = 'Enrollment date is required';
+                enrollmentDateError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate program
+            if (!programSelect.value) {
+                programError.textContent = 'Program is required';
+                programError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate date logic
+            if (birthDateInput.value && enrollmentDateInput.value) {
+                const birthDate = new Date(birthDateInput.value);
+                const enrollmentDate = new Date(enrollmentDateInput.value);
+                
+                if (enrollmentDate <= birthDate) {
+                    enrollmentDateError.textContent = 'Enrollment date must be after birth date';
+                    enrollmentDateError.style.display = 'block';
+                    isValid = false;
+                }
+            }
+            
+            return isValid;
+        }
+        
+        // Email validation helper
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Simulate server check for student ID
+        function checkStudentId(studentId) {
+            // In a real application, this would be a fetch call to the server
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // Mock data - in reality this would come from the server
+                    const mockData = {
+                        'STU001': {
+                            firstName: 'John',
+                            lastName: 'Doe',
+                            email: 'john.doe@example.com',
+                            birthDate: '2000-05-15',
+                            enrollmentDate: '2020-09-01',
+                            program: 'Computer Science'
+                        },
+                        'STU002': {
+                            firstName: 'Jane',
+                            lastName: 'Smith',
+                            email: 'jane.smith@example.com',
+                            birthDate: '1999-08-22',
+                            enrollmentDate: '2019-09-01',
+                            program: 'Business Administration'
+                        }
+                    };
+                    
+                    if (mockData[studentId]) {
+                        resolve({ exists: true, record: mockData[studentId] });
+                    } else {
+                        resolve({ exists: false });
+                    }
+                }, 500); // Simulate network delay
+            });
+        }
+        
+        // Simulate server save
+        function saveRecord(record) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // In a real app, this would save to a database
+                    console.log('Saving record:', record);
+                    resolve({ success: true });
+                }, 500);
+            });
+        }
+        
+        // Simulate server update
+        function updateRecord(studentId, record) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // In a real app, this would update the database
+                    console.log('Updating record for', studentId, ':', record);
+                    resolve({ success: true });
+                }, 500);
+            });
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', initializeForm);
+        
+        // Student ID blur or Enter key
+        studentIdInput.addEventListener('blur', handleStudentIdCheck);
+        studentIdInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleStudentIdCheck();
+            }
+        });
+        
+        // Save button click
+        saveBtn.addEventListener('click', handleSave);
+        
+        // Update button click
+        updateBtn.addEventListener('click', handleUpdate);
+        
+        // Reset button click
+        resetBtn.addEventListener('click', initializeForm);
+        
+        // Handle student ID check
+        async function handleStudentIdCheck() {
+            const studentId = studentIdInput.value.trim();
+            
+            if (!studentId) {
+                showStatusMessage('Please enter a Student ID', 'error');
+                return;
+            }
+            
+            showStatusMessage('Checking student ID...', 'info');
+            
+            try {
+                const result = await checkStudentId(studentId);
+                
+                if (result.exists) {
+                    // Record found - populate form for editing
+                    populateForm(result.record);
+                    studentIdInput.disabled = true;
+                    saveBtn.disabled = true;
+                    updateBtn.disabled = false;
+                    showStatusMessage('Record found - ready for editing', 'success');
+                    
+                    // Focus on next editable field
+                    firstNameInput.focus();
+                } else {
+                    // Record not found - enable form for new entry
+                    enableFormForNewEntry();
+                    showStatusMessage('Record not found - ready to create new record', 'info');
+                    
+                    // Focus on next editable field
+                    firstNameInput.focus();
+                }
+            } catch (error) {
+                console.error('Error checking student ID:', error);
+                showStatusMessage('Error checking student ID. Please try again.', 'error');
+            }
+        }
+        
+        // Populate form with record data
+        function populateForm(record) {
+            firstNameInput.value = record.firstName || '';
+            lastNameInput.value = record.lastName || '';
+            emailInput.value = record.email || '';
+            birthDateInput.value = record.birthDate || '';
+            enrollmentDateInput.value = record.enrollmentDate || '';
+            programSelect.value = record.program || '';
+            
+            // Enable all fields except student ID
+            firstNameInput.disabled = false;
+            lastNameInput.disabled = false;
+            emailInput.disabled = false;
+            birthDateInput.disabled = false;
+            enrollmentDateInput.disabled = false;
+            programSelect.disabled = false;
+        }
+        
+        // Enable form for new entry
+        function enableFormForNewEntry() {
+            // Clear all fields except student ID
+            firstNameInput.value = '';
+            lastNameInput.value = '';
+            emailInput.value = '';
+            birthDateInput.value = '';
+            enrollmentDateInput.value = '';
+            programSelect.value = '';
+            
+            // Enable all fields except student ID
+            firstNameInput.disabled = false;
+            lastNameInput.disabled = false;
+            emailInput.disabled = false;
+            birthDateInput.disabled = false;
+            enrollmentDateInput.disabled = false;
+            programSelect.disabled = false;
+            
+            // Enable Save button, disable Update button
+            saveBtn.disabled = false;
+            updateBtn.disabled = true;
+        }
+        
+        // Handle Save
+        async function handleSave() {
+            if (!validateForm()) {
+                showStatusMessage('Please fix validation errors before saving', 'error');
+                return;
+            }
+            
+            const record = {
+                studentId: studentIdInput.value.trim(),
+                firstName: firstNameInput.value.trim(),
+                lastName: lastNameInput.value.trim(),
+                email: emailInput.value.trim(),
+                birthDate: birthDateInput.value,
+                enrollmentDate: enrollmentDateInput.value,
+                program: programSelect.value
+            };
+            
+            showStatusMessage('Saving record...', 'info');
+            
+            try {
+                const result = await saveRecord(record);
+                
+                if (result.success) {
+                    showStatusMessage('Record saved successfully!', 'success');
+                    setTimeout(() => {
+                        initializeForm();
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Error saving record:', error);
+                showStatusMessage('Error saving record. Please try again.', 'error');
+            }
+        }
+        
+        // Handle Update
+        async function handleUpdate() {
+            if (!validateForm()) {
+                showStatusMessage('Please fix validation errors before updating', 'error');
+                return;
+            }
+            
+            const record = {
+                firstName: firstNameInput.value.trim(),
+                lastName: lastNameInput.value.trim(),
+                email: emailInput.value.trim(),
+                birthDate: birthDateInput.value,
+                enrollmentDate: enrollmentDateInput.value,
+                program: programSelect.value
+            };
+            
+            showStatusMessage('Updating record...', 'info');
+            
+            try {
+                const result = await updateRecord(studentIdInput.value.trim(), record);
+                
+                if (result.success) {
+                    showStatusMessage('Record updated successfully!', 'success');
+                    setTimeout(() => {
+                        initializeForm();
+                    }, 1500);
+                }
+            } catch (error) {
+                console.error('Error updating record:', error);
+                showStatusMessage('Error updating record. Please try again.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>
